@@ -11,7 +11,6 @@
 #include "shader.h"
 #include "node.h"
 #include "skybox.h"
-#include "camera.h"
 
 class Viewer {
 public:
@@ -27,6 +26,7 @@ public:
     Node *scene_root;
     std::string shader_dir;
     std::string tex_dir;
+    std::string model_dir;
 
 private:
     GLFWwindow* win;

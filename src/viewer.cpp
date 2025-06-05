@@ -1,5 +1,9 @@
 #include "viewer.h"
 #include "skybox.h"
+#include "model.h"
+#include "shader.h"
+#include "texture.h"
+#include "camera.h"
 
 #include <functional>
 #include <iostream>
@@ -98,9 +102,10 @@ Viewer::Viewer(int width, int height)
     // initialize our scene_root
     scene_root = new Node();
 
-    // get shader and textures directory
+    // get shaders, textures and models directory
     shader_dir = SHADER_DIR;
     tex_dir = TEX_DIR;
+    model_dir = MODEL_DIR;
 
     // initialize skybox
     skybox_shader = new Shader(shader_dir + "skybox.vert", shader_dir + "skybox.frag");
@@ -124,6 +129,10 @@ void Viewer::run()
 {
     glm::mat4 id_mat = glm::mat4(1.f);
 
+    Shader* model_shader = new Shader(shader_dir + "texture.vert", shader_dir + "texture.frag");
+
+    Model grassModel(model_dir + "Low Grass.obj");
+
     // Main render loop for this OpenGL window
     while (!glfwWindowShouldClose(win))
     {
@@ -140,15 +149,6 @@ void Viewer::run()
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), ratio, 0.1f, 100.0f);
 
         glm::mat4 view = camera.GetViewMatrix();
-
-        // glm::mat4 scale = glm::scale(id_mat, glm::vec3(1.F, 1.F, 1.F));
-        // glm::mat4 rotate = glm::mat4(1.f);
-        // glm::mat4 translate = glm::translate(id_mat, glm::vec3(0.F, 0.F, 0.F));
-        // glm::mat4 placement = translate * rotate;
-
-        // glm::mat4 view = glm::lookAt(glm::vec3(0.f, 0.f, 3.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 1.f));
-        // float ratio = static_cast<float>(width)/height;
-        // glm::mat4 projection = glm::perspective(glm::radians(45.f), ratio, 0.1f, 20.0f);
 
         // Anime le modèle s'il a une fonction d'animation
         if(animation_fun) animation_fun();

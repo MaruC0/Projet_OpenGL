@@ -6,7 +6,7 @@
 Node::Node(const glm::mat4& transform) {
     children_ = std::vector<Node*>();
 
-    scale_ = glm::mat4(1.F);
+    scale_ = transform;
     rotate_ = glm::mat4(1.F);
     translate_ = glm::mat4(1.F);
 

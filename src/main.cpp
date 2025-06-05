@@ -2,6 +2,8 @@
 #include "triangle.h"
 #include "node.h"
 #include "shader.h"
+#include "texture.h"
+#include "textured_triangle.h"
 #include <string>
 #include <GLFW/glfw3.h>
 
@@ -12,12 +14,16 @@
 int main()
 {
     // create window, add shaders & scene objects, then run rendering loop
-    Viewer viewer(1000,800);
+    Viewer viewer(1080,720);
 
-    // get shader directory
+    // get shaders and textures directory
     std::string shader_dir = SHADER_DIR;
+    std::string tex_dir = TEX_DIR;
 
     Shader *color_shader = new Shader(shader_dir + "node.vert", shader_dir + "node.frag");
+    Shader* texture_shader = new Shader(shader_dir + "texture.vert", shader_dir + "texture.frag");
+
+    Texture* ground_texture = new Texture(tex_dir + "texture_sol.jpg");
 
     // Utility functions and variables
     glm::mat4 id_mat = glm::mat4(1.0f); 
@@ -42,11 +48,20 @@ int main()
 
     Node* main_node = new Node(id_mat);
 
+    // Ground
+    Shape* ground = new TexturedTriangle(texture_shader, ground_texture);
+    Node* ground_node = new Node();
+    ground_node->set_Scale(uniform_scale(200.f));
+    ground_node->set_Rotate(simple_rotate(90.f, "x"));
+    ground_node->set_Translate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f)));
+
+    ground_node->add(ground);
+    viewer.scene_root->add(ground_node);
+
     Shape* triangle_shape = new Triangle(color_shader);
     Node* triangle_node = new Node(id_mat);
     triangle_node->add(triangle_shape);
     main_node->add(triangle_node);
-
 
     auto rotate_anim = [&](){
         
