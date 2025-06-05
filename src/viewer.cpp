@@ -157,12 +157,12 @@ void Viewer::run()
 
         glm::mat4 view = camera.GetViewMatrix();
 
-	ground->setCamera(camera.Position);
+	    ground->setCamera(camera.Position);
 
         ground->draw(ground_mat, view, projection);
 
-        // Anime le modèle s'il a une fonction d'animation
-        if(animation_fun) animation_fun();
+        // Activate every animation function
+        for(auto f : animation_funs) f();
 
         scene_root->draw(id_mat, id_mat, view, projection);
 
@@ -197,8 +197,8 @@ void Viewer::on_key(int key)
     }
 }
 
-void Viewer::set_animation_fun(std::function<void()> fun){
-    animation_fun = fun;
+void Viewer::add_animation_fun(std::function<void()> fun){
+    animation_funs.push_back(fun);
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

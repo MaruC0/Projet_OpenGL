@@ -25,7 +25,7 @@ public:
     int width;
     int height;
 
-    void set_animation_fun(std::function<void()> fun);
+    void add_animation_fun(std::function<void()> fun);
 
     Node *scene_root;
     std::string shader_dir;
@@ -34,7 +34,7 @@ public:
 
 private:
     GLFWwindow* win;
-    std::function<void()> animation_fun;
+    std::vector<std::function<void()>> animation_funs;
     static void key_callback_static(GLFWwindow* window, int key, int scancode, int action, int mods);
     Shader* skybox_shader;
     Skybox* skybox;
