@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "node.h"
 #include "skybox.h"
+#include "camera.h"
 
 class Viewer {
 public:
