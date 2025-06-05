@@ -5,6 +5,7 @@
 #include "shader.h"
 #include <GL/glew.h>
 
+
 class Skybox{
 public:
     GLint shader_program_;
@@ -15,8 +16,7 @@ public:
 
 private:
     GLuint VAO;
-    GLuint VBO;
-    GLuint EBO;
+    GLuint buffers[2];
     std::vector<std::string> textures;
     unsigned int loadCubemap(std::vector<std::string> faces);
     unsigned int cubemapTexture;
