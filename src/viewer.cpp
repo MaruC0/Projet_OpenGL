@@ -1,9 +1,4 @@
 #include "viewer.h"
-#include "skybox.h"
-#include "model.h"
-#include "shader.h"
-#include "texture.h"
-#include "camera.h"
 
 #include <functional>
 #include <iostream>
@@ -13,6 +8,12 @@
 
 #ifndef SHADER_DIR
 #error "SHADER_DIR not defined"
+#endif
+#ifndef TEX_DIR
+#error "TEX_DIR not defined"
+#endif
+#ifndef MODEL_DIR
+#error "MODEL_DIR not defined"
 #endif
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -113,14 +114,20 @@ Viewer::Viewer(int width, int height)
     {
     tex_dir + "left.png",
     tex_dir + "right.png",
-    // tex_dir + "right.png",
-    // tex_dir + "left.png",
     tex_dir + "top.png",
     tex_dir + "bottom.png",
     tex_dir + "front.png",
     tex_dir + "back.png"
     };
     skybox = new Skybox(skybox_shader, faces);
+
+    // initialize ground
+    Shader* texture_shader = new Shader(shader_dir + "ground.vert", shader_dir + "ground.frag");
+    Texture* texture = new Texture(tex_dir + "texture_sol3.jpg");
+    ground = new Ground(texture_shader, texture, glm::vec3(-50.f, 10.f, -11.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.5f, 0.5f, 0.5f));
+    ground_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f))
+        * glm::scale(glm::mat4(1.0f), glm::vec3(50.0f, 50.0f, 50.0f))
+        * glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
 
@@ -150,6 +157,10 @@ void Viewer::run()
 
         glm::mat4 view = camera.GetViewMatrix();
 
+	ground->setCamera(camera.Position);
+
+        ground->draw(ground_mat, view, projection);
+
         // Anime le modèle s'il a une fonction d'animation
         if(animation_fun) animation_fun();
 
@@ -168,6 +179,7 @@ void Viewer::run()
     glfwTerminate();
     skybox->~Skybox();
     skybox_shader->~Shader();
+    ground->~Ground();
 }
 
 void Viewer::key_callback_static(GLFWwindow* window, int key, int scancode, int action, int mods)
