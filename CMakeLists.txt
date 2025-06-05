@@ -29,8 +29,11 @@ set(SOURCES
     ${SRC_DIR}/skybox.cpp
 )
 
-# Define Shader director
+# Define Shader directory
 add_compile_definitions(SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shaders/")
+
+# Define Texture directory
+add_compile_definitions(TEX_DIR="${CMAKE_CURRENT_SOURCE_DIR}/textures/")
 
 # GLEW library
 add_subdirectory(${GLEW_DIR})

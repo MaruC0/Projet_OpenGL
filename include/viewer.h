@@ -11,6 +11,7 @@
 #include "shader.h"
 #include "node.h"
 #include "skybox.h"
+#include "camera.h"
 
 class Viewer {
 public:
@@ -24,11 +25,15 @@ public:
     void set_animation_fun(std::function<void()> fun);
 
     Node *scene_root;
+    std::string shader_dir;
+    std::string tex_dir;
 
 private:
     GLFWwindow* win;
     std::function<void()> animation_fun;
     static void key_callback_static(GLFWwindow* window, int key, int scancode, int action, int mods);
+    Shader* skybox_shader;
+    Skybox* skybox;
 };
 
 #endif // VIEWER_H
