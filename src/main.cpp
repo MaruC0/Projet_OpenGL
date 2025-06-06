@@ -35,6 +35,7 @@ int main()
         float time = glfwGetTime();
         float angle = time * 40 * 2;
         float scale_factor = (glm::pow(glm::sin(glm::radians(angle*1.2f)), 2) + 4.f) / 5.f;
+        triangle_node->set_Translate(glm::translate(id_mat, glm::vec3(-35.0f, 0.0f, -40.0f)));
         triangle_node->set_RotateAnim(simple_rotate(angle, "y"));
         triangle_node->set_ScaleAnim(uniform_scale(scale_factor));
     };
@@ -68,6 +69,20 @@ int main()
     body_node->add(upper_body);
     body_node->add(lower_body);
 
+
+    // Main head (Swap between Main head / Neck and Neck / Head Node for third person view)
+    Node* head_node = create_Node_cylinder();
+    head_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, 1.05f)));
+    head_node->set_Scale(uniform_scale(0.55f));
+    upper_body->add(head_node);
+
+    // Neck
+    Node* neck_node = create_Node_cylinder();
+    neck_node->set_Scale(uniform_scale(0.6f));
+    neck_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, -.4f)));
+    head_node->add(neck_node);
+    
+    /*
     // Neck
     Node* neck_node = create_Node_cylinder();
     neck_node->set_Scale(uniform_scale(0.33f));
@@ -79,6 +94,7 @@ int main()
     head_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, .4f)));
     head_node->set_Scale(uniform_scale(1.667f));
     neck_node->add(head_node);
+    */
 
     // Eyes
     glm::mat4 eye_scale = glm::scale(id_mat, glm::vec3(.3f, .2f, .35f));
@@ -250,7 +266,8 @@ int main()
         left_elbow_node->set_RotateAnim(simple_rotate(angle2, "y"));
     };
     viewer.add_animation_fun(waving_animation);
-
+    
+    // Allows to have a third person view of the character
     auto human_follow = [&]() {
 
         float time = static_cast<float>(glfwGetTime()) * 2.f;
@@ -265,12 +282,12 @@ int main()
         human_anchor->set_TranslateAnim(glm::translate(id_mat, new_pos));
 
         auto yaw = camera.Yaw;
-        body_node->set_RotateAnim(simple_rotate(90.f -yaw, "y"));
+        body_node->set_RotateAnim(simple_rotate(90.f - yaw, "y"));
 
         auto pitch = camera.Pitch;
         neck_node->set_RotateAnim(simple_rotate(-pitch, "x"));
     };
-    viewer.add_animation_fun(human_follow);
-    
+    //viewer.add_animation_fun(human_follow);
+
     viewer.run();
 }

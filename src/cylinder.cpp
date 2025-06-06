@@ -4,7 +4,7 @@
 #include "glm/ext.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
-Cylinder::Cylinder(Shader *shader_program, float height, float radius, int slices)
+Cylinder::Cylinder(Shader* shader_program, float height, float radius, int slices)
     : Shape(shader_program)
 {
     // generate vertices
@@ -35,7 +35,7 @@ Cylinder::Cylinder(Shader *shader_program, float height, float radius, int slice
         indices.push_back(2 * slices);
         indices.push_back(2 * i + 1);
         indices.push_back((2 * i + 3) % (2 * slices));
-        indices.push_back(2*slices + 1);
+        indices.push_back(2 * slices + 1);
     }
 
     glGenVertexArrays(1, &VAO);

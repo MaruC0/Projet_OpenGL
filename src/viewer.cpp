@@ -23,7 +23,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // camera
-Camera camera(glm::vec3(0.0f, 1.7f, 10.0f));
+Camera camera(glm::vec3(0.0f, 1.7f, 3.0f));
 float lastX;
 float lastY;
 bool firstMouse = true;
@@ -38,7 +38,6 @@ Viewer::Viewer(int width, int height)
     this->height = height;
 
 
-    // this->camera = camera;
     lastX = width / 2.0f;
     lastY = height / 2.0f;
 
@@ -122,7 +121,9 @@ Viewer::Viewer(int width, int height)
         tex_dir + "back.png"
     };
     skybox = new Skybox(skybox_shader, faces);
-
+    Texture* tex = new Texture(model_dir + "Grass.png");
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, tex->getGLid());
     // initialize ground
     Shader* texture_shader = new Shader(shader_dir + "ground.vert", shader_dir + "ground.frag");
     Texture* texture = new Texture(tex_dir + "texture_sol.jpg");
@@ -138,9 +139,16 @@ void Viewer::run()
 {
     glm::mat4 id_mat = glm::mat4(1.f);
 
-    Shader* model_shader = new Shader(shader_dir + "node.vert", shader_dir + "node.frag");
+    Shader* plane_shader = new Shader(shader_dir + "plane.vert", shader_dir + "plane.frag");
 
     Model grassModel(model_dir + "Low Grass.obj");
+
+    Shader* model_shader = new Shader(shader_dir + "model.vert", shader_dir + "model.frag");
+
+    Model planeModel(model_dir + "Light Aircraft.obj");
+
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    generateGrassGrid(25, 25, 5.0f);
 
     // Main render loop for this OpenGL window
     while (!glfwWindowShouldClose(win))
@@ -152,56 +160,76 @@ void Viewer::run()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        float ratio = static_cast<float>(width) / height;
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), ratio, 0.1f, 100.0f);
+
         processInput(win);
 
-        glUseProgram(model_shader->get_id());
+        // Draws the plane
 
-        float ratio = static_cast<float>(width)/height;
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), ratio, 0.1f, 100.0f);
-        
-        GLint loc = glGetUniformLocation(model_shader->get_id(), "projection");
+        glUseProgram(plane_shader->get_id());
+
+        GLint loc = glGetUniformLocation(plane_shader->get_id(), "projection");
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
 
         glm::mat4 view = camera.GetViewMatrix();
 
+        loc = glGetUniformLocation(plane_shader->get_id(), "view");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
+
+        glm::mat4 model_plane = glm::mat4(1.0f);
+        model_plane = glm::translate(model_plane, glm::vec3(-5.0f, -2.0f, -5.0f));
+        model_plane = glm::scale(model_plane, glm::vec3(2.0f, 2.0f, 2.0f));
+
+        loc = glGetUniformLocation(plane_shader->get_id(), "model");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model_plane));
+
+        loc = glGetUniformLocation(plane_shader->get_id(), "lightPos");
+        glUniform3fv(loc, 1, glm::value_ptr(glm::vec3(-50.f, 10.f, -11.f)));
+
+        loc = glGetUniformLocation(plane_shader->get_id(), "viewPos");
+        glUniform3fv(loc, 1, glm::value_ptr(camera.Position));
+
+        loc = glGetUniformLocation(plane_shader->get_id(), "lightColor");
+        glUniform3fv(loc, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
+
+        loc = glGetUniformLocation(plane_shader->get_id(), "objectColor");
+        glUniform3fv(loc, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
+
+        planeModel.Draw(*plane_shader);
+
+
+        // Draws the grass
+
+        glUseProgram(model_shader->get_id());
+        
+        loc = glGetUniformLocation(model_shader->get_id(), "projection");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
+
         loc = glGetUniformLocation(model_shader->get_id(), "view");
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
 
-        glm::mat4 model2 = glm::mat4(1.0f);
-        model2 = glm::translate(model2, glm::vec3(5.0f, -1.8f, 0.0f));
-        model2 = glm::scale(model2, glm::vec3(50.0f, 50.0f, 50.0f));
+        loc = glGetUniformLocation(plane_shader->get_id(), "lightPos");
+        glUniform3fv(loc, 1, glm::value_ptr(glm::vec3(-50.f, 10.f, -11.f)));
 
-        loc = glGetUniformLocation(model_shader->get_id(), "model");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model2));
+        loc = glGetUniformLocation(plane_shader->get_id(), "viewPos");
+        glUniform3fv(loc, 1, glm::value_ptr(camera.Position));
 
-        grassModel.Draw(*model_shader);
+        loc = glGetUniformLocation(plane_shader->get_id(), "lightColor");
+        glUniform3fv(loc, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
 
-        glm::mat4 model3 = glm::mat4(1.0f);
-        model3 = glm::translate(model3, glm::vec3(-5.0f, -1.8f, 0.0f));
-        model3 = glm::scale(model3, glm::vec3(50.0f, 50.0f, 50.0f));
+        loc = glGetUniformLocation(plane_shader->get_id(), "objectColor");
+        glUniform3fv(loc, 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
 
-        loc = glGetUniformLocation(model_shader->get_id(), "model");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model3));
+        loc = glGetUniformLocation(plane_shader->get_id(), "model");
 
-        grassModel.Draw(*model_shader);
+        for (const auto& model : model_matrices) {
+            GLuint loc = glGetUniformLocation(plane_shader->get_id(), "model");
+            glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
+            grassModel.Draw(*plane_shader);
+        }
 
-        glm::mat4 model4 = glm::mat4(1.0f);
-        model4 = glm::translate(model4, glm::vec3(3.0f, -1.8f, -10.0f));
-        model4 = glm::scale(model4, glm::vec3(50.0f, 50.0f, 50.0f));
-
-        loc = glGetUniformLocation(model_shader->get_id(), "model");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model4));
-
-        grassModel.Draw(*model_shader);
-
-        glm::mat4 model5 = glm::mat4(1.0f);
-        model5 = glm::translate(model5, glm::vec3(-3.0f, -1.8f, -10.0f));
-        model5 = glm::scale(model5, glm::vec3(50.0f, 50.0f, 50.0f));
-
-        loc = glGetUniformLocation(model_shader->get_id(), "model");
-        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model5));
-
-        grassModel.Draw(*model_shader);
+        // Draws the ground
 
 	    ground->setCamera(camera.Position);
 
@@ -210,8 +238,10 @@ void Viewer::run()
         // Activate every animation function
         for(auto f : animation_funs) f();
 
+        // Draws the character
         scene_root->draw(id_mat, id_mat, view, projection);
 
+        // Draws the skybox
         skybox->draw(id_mat, view, projection);
 
         // Poll for and process events
@@ -305,6 +335,32 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-Camera Viewer::get_camera(){
-    return camera;
+Camera Viewer::get_camera() {
+        return camera;
+}
+
+// Generates the grass with a bit of jitter so it doesn't look too artificial
+void Viewer::generateGrassGrid(int grid_x, int grid_z, float spacing) {
+    model_matrices.clear();
+
+    for (int x = -grid_x; x <= grid_x; ++x) {
+        for (int z = -grid_z; z <= grid_z; ++z) {
+            if (x <= 3.0f && x >= -3.0f && z <= 3.0f && z >= -3.0f) {
+                continue;
+            }
+            else {
+                float jitterX = ((rand() % 100) / 100.0f - 0.5f) * 2.0f;
+                float jitterZ = ((rand() % 100) / 100.0f - 0.5f) * 2.0f;
+                float scale = 40.0f + (rand() % 20);
+                float angle = glm::radians((rand() % 360) * 1.0f);
+
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x * spacing + jitterX, -2.0f, z * spacing + jitterZ));
+                model = glm::rotate(model, angle, glm::vec3(0, 1, 0));
+                model = glm::scale(model, glm::vec3(scale));
+
+                model_matrices.push_back(model);
+            }
+        }
+    }
 }
