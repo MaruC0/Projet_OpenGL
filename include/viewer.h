@@ -14,7 +14,7 @@
 #include "ground.h"
 #include "texture.h"
 #include "camera.h"
-#include "model.h"
+// #include "model.h"
 
 class Viewer {
 public:

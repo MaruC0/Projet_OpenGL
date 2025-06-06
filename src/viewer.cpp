@@ -1,4 +1,5 @@
 #include "viewer.h"
+#include "utils.h"
 
 #include <functional>
 #include <iostream>
@@ -123,13 +124,13 @@ Viewer::Viewer(int width, int height)
 
     // initialize ground
     Shader* texture_shader = new Shader(shader_dir + "ground.vert", shader_dir + "ground.frag");
-    Texture* texture = new Texture(tex_dir + "texture_sol3.jpg");
+    Texture* texture = new Texture(tex_dir + "texture_sol.jpg");
     ground = new Ground(texture_shader, texture, glm::vec3(-50.f, 10.f, -11.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.5f, 0.5f, 0.5f));
     ground_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f))
-        * glm::scale(glm::mat4(1.0f), glm::vec3(50.0f, 50.0f, 50.0f))
-        * glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        * uniform_scale(200.f)
+        * simple_rotate(0.f, "x");
+        // * glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
-
 
 
 void Viewer::run()
@@ -138,7 +139,7 @@ void Viewer::run()
 
     Shader* model_shader = new Shader(shader_dir + "texture.vert", shader_dir + "texture.frag");
 
-    Model grassModel(model_dir + "Low Grass.obj");
+    // Model grassModel(model_dir + "Low Grass.obj");
 
     // Main render loop for this OpenGL window
     while (!glfwWindowShouldClose(win))

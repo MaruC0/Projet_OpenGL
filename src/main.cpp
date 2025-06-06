@@ -1,10 +1,9 @@
+#include <string>
 #include "viewer.h"
 #include "triangle.h"
 #include "cylinder.h"
 #include "node.h"
 #include "shader.h"
-#include "texture.h"
-#include "textured_triangle.h"
 #include "utils.h"
 #include <string>
 #include <GLFW/glfw3.h>
@@ -20,33 +19,8 @@ int main()
 
     // get shaders and textures directory
     std::string shader_dir = SHADER_DIR;
-    std::string tex_dir = TEX_DIR;
 
     Shader *color_shader = new Shader(shader_dir + "node.vert", shader_dir + "node.frag");
-    Shader* texture_shader = new Shader(shader_dir + "texture.vert", shader_dir + "texture.frag");
-
-    Texture* ground_texture = new Texture(tex_dir + "texture_sol.jpg");
-
-    // Utility functions and variables
-    glm::mat4 id_mat = glm::mat4(1.0f); 
-    
-    auto simple_rotate = [id_mat](float angle, std::string axis) {
-        glm::vec3 vec;
-        if (axis == "x") {
-            vec = glm::vec3(1.f, 0.f, 0.f);
-        }
-        else if (axis == "y") {
-            vec = glm::vec3(0.f, 1.f, 0.f);
-        }
-        else if (axis == "z") {
-            vec = glm::vec3(0.f, 0.f, 1.f);
-        }
-        return glm::rotate(id_mat, glm::radians(angle), vec);
-    };
-
-    auto uniform_scale = [id_mat](auto factor) {
-        return glm::scale(id_mat, glm::vec3(factor, factor, factor));
-    };
 
     Node* main_node = new Node(id_mat);
     viewer.scene_root->add(main_node);
@@ -67,9 +41,10 @@ int main()
     };
     viewer.add_animation_fun(rotate_anim);
 
-    // Human
+    // ========= Human =========
     Node* human_anchor = new Node();
     human_anchor->set_Translate(glm::translate(id_mat, glm::vec3(3.f, 0.f, 0.f)));
+    main_node->add(human_anchor);
 
     auto create_Node_cylinder = [color_shader](glm::mat4 model_mat = glm::mat4(1.F)) {
         Shape* shape = new Cylinder(color_shader);
@@ -269,15 +244,13 @@ int main()
         float time = static_cast<float>(glfwGetTime()) * 2.f;
         float init_angle = 110.f;
         float angle = glm::sin(time)*30.F + init_angle;
-        float angle2 = glm::sin(time * 4)*15.F + 70.F;
+        float angle2 = glm::sin(time * 4.f)*15.F + 70.F;
 
         left_shoulder_node->set_RotateAnim(simple_rotate(angle, "y"));
 
         left_elbow_node->set_RotateAnim(simple_rotate(angle2, "y"));
     };
     viewer.add_animation_fun(waving_animation);
-    // create_human_alex(human_anchor, color_shader, viewer);
-    main_node->add(human_anchor);
     
     viewer.run();
 }

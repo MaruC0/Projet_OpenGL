@@ -34,6 +34,7 @@ set(SOURCES
     ${SRC_DIR}/textured_triangle.cpp
     ${SRC_DIR}/skybox.cpp
     ${SRC_DIR}/ground.cpp
+    ${SRC_DIR}/utils.cpp
 )
 
 # Define Shader directory
