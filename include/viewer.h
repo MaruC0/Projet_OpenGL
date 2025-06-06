@@ -41,6 +41,8 @@ private:
     Skybox* skybox;
     Ground* ground;
     glm::mat4 ground_mat;
+    void generateGrassGrid(int grid_x, int grid_z, float spacing);
+    std::vector<glm::mat4> model_matrices;
 };
 
 #endif // VIEWER_H

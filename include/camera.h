@@ -62,7 +62,9 @@ public:
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
-        // Result adapted to be positioned on a sphere centered around Position
+        return glm::lookAt(Position, Position + Front, Up);
+        /* To enable third person view, uncomment this and comment the return just above.
+        // Result adapted to be positioned on a sphere centered around PositionAdd commentMore actions
         float dist_from_center = -10.f;
         glm::vec3 centered_pos;
         centered_pos.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
@@ -71,8 +73,9 @@ public:
         centered_pos *= dist_from_center;
         centered_pos += Position;
         // Prevent from clipping throught the ground
-        if(centered_pos.y < -2.f) centered_pos.y = -2.f; 
+        if (centered_pos.y < -2.f) centered_pos.y = -2.f;
         return glm::lookAt(centered_pos, Position + Front, Up);
+        */
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
