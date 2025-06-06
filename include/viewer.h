@@ -26,6 +26,7 @@ public:
     int height;
 
     void add_animation_fun(std::function<void()> fun);
+    Camera get_camera();
 
     Node *scene_root;
     std::string shader_dir;

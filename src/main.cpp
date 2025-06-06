@@ -1,4 +1,3 @@
-#include <string>
 #include "viewer.h"
 #include "triangle.h"
 #include "cylinder.h"
@@ -43,7 +42,7 @@ int main()
 
     // ========= Human =========
     Node* human_anchor = new Node();
-    human_anchor->set_Translate(glm::translate(id_mat, glm::vec3(3.f, 0.f, 0.f)));
+    human_anchor->set_Translate(glm::translate(id_mat, glm::vec3(2.f, 0.f, 0.f)));
     main_node->add(human_anchor);
 
     auto create_Node_cylinder = [color_shader](glm::mat4 model_mat = glm::mat4(1.F)) {
@@ -69,17 +68,17 @@ int main()
     body_node->add(upper_body);
     body_node->add(lower_body);
 
-    // Main head node
-    Node* head_node = create_Node_cylinder();
-    head_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, 1.05f)));
-    head_node->set_Scale(uniform_scale(0.55f));
-    upper_body->add(head_node);
-
     // Neck
     Node* neck_node = create_Node_cylinder();
-    neck_node->set_Scale(uniform_scale(0.6f));
-    neck_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, -.4f)));
-    head_node->add(neck_node);
+    neck_node->set_Scale(uniform_scale(0.33f));
+    neck_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, .65f)));
+    upper_body->add(neck_node);
+
+    // Head node
+    Node* head_node = create_Node_cylinder();
+    head_node->set_Translate(glm::translate(id_mat, glm::vec3(.0f, .0f, .4f)));
+    head_node->set_Scale(uniform_scale(1.667f));
+    neck_node->add(head_node);
 
     // Eyes
     glm::mat4 eye_scale = glm::scale(id_mat, glm::vec3(.3f, .2f, .35f));
@@ -251,6 +250,27 @@ int main()
         left_elbow_node->set_RotateAnim(simple_rotate(angle2, "y"));
     };
     viewer.add_animation_fun(waving_animation);
+
+    auto human_follow = [&]() {
+
+        float time = static_cast<float>(glfwGetTime()) * 2.f;
+
+        Camera camera = viewer.get_camera();
+
+        glm::vec3 cam_pos = camera.Position;
+        glm::vec3 new_pos;
+        new_pos.x = cam_pos.x - 2.f;
+        new_pos.y = 0.f;
+        new_pos.z = cam_pos.z;
+        human_anchor->set_TranslateAnim(glm::translate(id_mat, new_pos));
+
+        auto yaw = camera.Yaw;
+        body_node->set_RotateAnim(simple_rotate(90.f -yaw, "y"));
+
+        auto pitch = camera.Pitch;
+        neck_node->set_RotateAnim(simple_rotate(-pitch, "x"));
+    };
+    viewer.add_animation_fun(human_follow);
     
     viewer.run();
 }

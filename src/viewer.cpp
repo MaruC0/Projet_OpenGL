@@ -23,7 +23,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 1.7f, 10.0f));
 float lastX;
 float lastY;
 bool firstMouse = true;
@@ -37,6 +37,8 @@ Viewer::Viewer(int width, int height)
     this->width = width;
     this->height = height;
 
+
+    // this->camera = camera;
     lastX = width / 2.0f;
     lastY = height / 2.0f;
 
@@ -174,6 +176,33 @@ void Viewer::run()
 
         grassModel.Draw(*model_shader);
 
+        glm::mat4 model3 = glm::mat4(1.0f);
+        model3 = glm::translate(model3, glm::vec3(-5.0f, -1.8f, 0.0f));
+        model3 = glm::scale(model3, glm::vec3(50.0f, 50.0f, 50.0f));
+
+        loc = glGetUniformLocation(model_shader->get_id(), "model");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model3));
+
+        grassModel.Draw(*model_shader);
+
+        glm::mat4 model4 = glm::mat4(1.0f);
+        model4 = glm::translate(model4, glm::vec3(3.0f, -1.8f, -10.0f));
+        model4 = glm::scale(model4, glm::vec3(50.0f, 50.0f, 50.0f));
+
+        loc = glGetUniformLocation(model_shader->get_id(), "model");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model4));
+
+        grassModel.Draw(*model_shader);
+
+        glm::mat4 model5 = glm::mat4(1.0f);
+        model5 = glm::translate(model5, glm::vec3(-3.0f, -1.8f, -10.0f));
+        model5 = glm::scale(model5, glm::vec3(50.0f, 50.0f, 50.0f));
+
+        loc = glGetUniformLocation(model_shader->get_id(), "model");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model5));
+
+        grassModel.Draw(*model_shader);
+
 	    ground->setCamera(camera.Position);
 
         ground->draw(ground_mat, view, projection);
@@ -274,4 +303,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+Camera Viewer::get_camera(){
+    return camera;
 }

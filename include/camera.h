@@ -36,6 +36,7 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    float GroundLevel;
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -44,6 +45,7 @@ public:
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
+        GroundLevel = position.y;
         updateCameraVectors();
     }
     // constructor with scalar values
@@ -53,13 +55,24 @@ public:
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
+        GroundLevel = posY;
         updateCameraVectors();
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
-        return glm::lookAt(Position, Position + Front, Up);
+        // Result adapted to be positioned on a sphere centered around Position
+        float dist_from_center = -10.f;
+        glm::vec3 centered_pos;
+        centered_pos.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+        centered_pos.y = sin(glm::radians(Pitch));
+        centered_pos.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+        centered_pos *= dist_from_center;
+        centered_pos += Position;
+        // Prevent from clipping throught the ground
+        if(centered_pos.y < -2.f) centered_pos.y = -2.f; 
+        return glm::lookAt(centered_pos, Position + Front, Up);
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -75,7 +88,7 @@ public:
         if (direction == RIGHT)
             Position += Right * velocity;
         // make sure the user stays at the ground level
-        Position.y = 0.0f;
+        Position.y = GroundLevel;
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -105,8 +118,8 @@ public:
         Zoom -= (float)yoffset * 3;
         if (Zoom < 1.0f)
             Zoom = 1.0f;
-        if (Zoom > 45.0f)
-            Zoom = 45.0f;
+        if (Zoom > 60.0f)
+            Zoom = 60.0f;
     }
 
 private:
