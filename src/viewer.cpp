@@ -111,14 +111,13 @@ Viewer::Viewer(int width, int height)
 
     // initialize skybox
     skybox_shader = new Shader(shader_dir + "skybox.vert", shader_dir + "skybox.frag");
-    std::vector<std::string> faces =
-    {
-    tex_dir + "left.png",
-    tex_dir + "right.png",
-    tex_dir + "top.png",
-    tex_dir + "bottom.png",
-    tex_dir + "front.png",
-    tex_dir + "back.png"
+    std::vector<std::string> faces = {
+        tex_dir + "left.png",
+        tex_dir + "right.png",
+        tex_dir + "top.png",
+        tex_dir + "bottom.png",
+        tex_dir + "front.png",
+        tex_dir + "back.png"
     };
     skybox = new Skybox(skybox_shader, faces);
 
@@ -137,9 +136,9 @@ void Viewer::run()
 {
     glm::mat4 id_mat = glm::mat4(1.f);
 
-    Shader* model_shader = new Shader(shader_dir + "texture.vert", shader_dir + "texture.frag");
+    Shader* model_shader = new Shader(shader_dir + "node.vert", shader_dir + "node.frag");
 
-    // Model grassModel(model_dir + "Low Grass.obj");
+    Model grassModel(model_dir + "Low Grass.obj");
 
     // Main render loop for this OpenGL window
     while (!glfwWindowShouldClose(win))
@@ -153,10 +152,27 @@ void Viewer::run()
 
         processInput(win);
 
+        glUseProgram(model_shader->get_id());
+
         float ratio = static_cast<float>(width)/height;
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), ratio, 0.1f, 100.0f);
+        
+        GLint loc = glGetUniformLocation(model_shader->get_id(), "projection");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
 
         glm::mat4 view = camera.GetViewMatrix();
+
+        loc = glGetUniformLocation(model_shader->get_id(), "view");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
+
+        glm::mat4 model2 = glm::mat4(1.0f);
+        model2 = glm::translate(model2, glm::vec3(5.0f, -1.8f, 0.0f));
+        model2 = glm::scale(model2, glm::vec3(50.0f, 50.0f, 50.0f));
+
+        loc = glGetUniformLocation(model_shader->get_id(), "model");
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model2));
+
+        grassModel.Draw(*model_shader);
 
 	    ground->setCamera(camera.Position);
 

@@ -35,6 +35,7 @@ set(SOURCES
     ${SRC_DIR}/skybox.cpp
     ${SRC_DIR}/ground.cpp
     ${SRC_DIR}/utils.cpp
+    ${SRC_DIR}/model.cpp
 )
 
 # Define Shader directory
