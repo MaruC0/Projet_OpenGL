@@ -159,19 +159,17 @@ void Viewer::run()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        float ratio = static_cast<float>(width) / height;
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), ratio, 0.1f, 100.0f);
-
         processInput(win);
 
-        // Draws the plane
+        glm::mat4 view = camera.GetViewMatrix();
+        float ratio = static_cast<float>(width) / height;
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), ratio, 0.1f, 1000.0f);
 
+        // Draws the plane
         glUseProgram(plane_shader->get_id());
 
         GLint loc = glGetUniformLocation(plane_shader->get_id(), "projection");
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
-
-        glm::mat4 view = camera.GetViewMatrix();
 
         loc = glGetUniformLocation(plane_shader->get_id(), "view");
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
@@ -199,7 +197,6 @@ void Viewer::run()
 
 
         // Draws the grass
-
         glUseProgram(model_shader->get_id());
         
         loc = glGetUniformLocation(model_shader->get_id(), "projection");
@@ -229,7 +226,6 @@ void Viewer::run()
         }
 
         // Draws the ground
-
 	    ground->setCamera(camera.Position);
 
         ground->draw(ground_mat, view, projection);
