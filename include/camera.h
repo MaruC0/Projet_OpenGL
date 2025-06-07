@@ -36,7 +36,8 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
-    float GroundLevel;
+    float InitialY;
+    float GroundLevel = -2.f; // In the future, initialised by parameter depending on the ground creation in viwer
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -45,7 +46,7 @@ public:
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
-        GroundLevel = position.y;
+        InitialY = position.y;
         updateCameraVectors();
     }
     // constructor with scalar values
@@ -55,27 +56,22 @@ public:
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
-        GroundLevel = posY;
+        InitialY = posY;
         updateCameraVectors();
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
-        return glm::lookAt(Position, Position + Front, Up);
-        /* To enable third person view, uncomment this and comment the return just above.
-        // Result adapted to be positioned on a sphere centered around PositionAdd commentMore actions
-        float dist_from_center = -10.f;
-        glm::vec3 centered_pos;
-        centered_pos.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-        centered_pos.y = sin(glm::radians(Pitch));
-        centered_pos.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-        centered_pos *= dist_from_center;
-        centered_pos += Position;
+        // Result adapted to be positioned on a sphere centered around Position
+        // at dist_from_center. Negative value for back vue, positive for front vue.
+        // Set dist_from_center at 0 for first person view.
+        float dist_from_center = -0.f;
+        auto new_pos = Position + Front*dist_from_center;
         // Prevent from clipping throught the ground
-        if (centered_pos.y < -2.f) centered_pos.y = -2.f;
-        return glm::lookAt(centered_pos, Position + Front, Up);
-        */
+        float margin = 0.05f;
+        if (new_pos.y < GroundLevel + margin) new_pos.y = GroundLevel + margin;
+        return glm::lookAt(new_pos, Position + Front, Up);        
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -91,7 +87,7 @@ public:
         if (direction == RIGHT)
             Position += Right * velocity;
         // make sure the user stays at the ground level
-        Position.y = GroundLevel;
+        Position.y = InitialY;
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.

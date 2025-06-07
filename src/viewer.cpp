@@ -23,7 +23,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // camera
-Camera camera(glm::vec3(0.0f, 1.7f, 3.0f));
+Camera camera(glm::vec3(0.0f, 1.7f, 10.0f));
 float lastX;
 float lastY;
 bool firstMouse = true;
@@ -121,24 +121,23 @@ Viewer::Viewer(int width, int height)
         tex_dir + "back.png"
     };
     skybox = new Skybox(skybox_shader, faces);
+
+    // initialize grass
     Texture* tex = new Texture(model_dir + "Grass.png");
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, tex->getGLid());
+
     // initialize ground
     Shader* texture_shader = new Shader(shader_dir + "ground.vert", shader_dir + "ground.frag");
     Texture* texture = new Texture(tex_dir + "texture_sol.jpg");
     ground = new Ground(texture_shader, texture, glm::vec3(-50.f, 10.f, -11.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.5f, 0.5f, 0.5f));
     ground_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 0.0f))
-        * uniform_scale(200.f)
-        * simple_rotate(0.f, "x");
-        // * glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        * uniform_scale(200.f);
 }
 
 
 void Viewer::run()
 {
-    glm::mat4 id_mat = glm::mat4(1.f);
-
     Shader* plane_shader = new Shader(shader_dir + "plane.vert", shader_dir + "plane.frag");
 
     Model grassModel(model_dir + "Low Grass.obj");
