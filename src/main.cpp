@@ -14,7 +14,7 @@
 int main()
 {
     // create window, add shaders & scene objects, then run rendering loop
-    Viewer viewer(1080, 720);
+    Viewer viewer(1920, 1080);
 
     // get shaders and textures directory
     std::string shader_dir = SHADER_DIR;
@@ -35,7 +35,7 @@ int main()
         float time = glfwGetTime();
         float angle = time * 40 * 2;
         float scale_factor = (glm::pow(glm::sin(glm::radians(angle*1.2f)), 2) + 4.f) / 5.f;
-        triangle_node->set_Translate(glm::translate(id_mat, glm::vec3(-35.0f, 0.0f, -40.0f)));
+        triangle_node->set_Translate(glm::translate(id_mat, glm::vec3(-0.0f, 25.0f, 80.0f)));
         triangle_node->set_RotateAnim(simple_rotate(angle, "y"));
         triangle_node->set_ScaleAnim(uniform_scale(scale_factor));
     };
@@ -252,7 +252,7 @@ int main()
     };
     viewer.add_animation_fun(waving_animation);
     
-    // Make the human follow the camera position
+    // Allows to have a third person view of the character
     auto human_follow = [&]() {
 
         float time = static_cast<float>(glfwGetTime()) * 2.f;
@@ -266,11 +266,13 @@ int main()
         new_pos.z = cam_pos.z;
         human_anchor->set_TranslateAnim(glm::translate(id_mat, new_pos));
 
-        body_node->set_RotateAnim(simple_rotate(90.f - camera.Yaw, "y"));
+        auto yaw = camera.Yaw;
+        body_node->set_RotateAnim(simple_rotate(90.f - yaw, "y"));
 
-        neck_node->set_RotateAnim(simple_rotate(-camera.Pitch, "x"));
+        auto pitch = camera.Pitch;
+        neck_node->set_RotateAnim(simple_rotate(-pitch, "x"));
     };
-    // viewer.add_animation_fun(human_follow);
+    viewer.add_animation_fun(human_follow);
 
     viewer.run();
 }
